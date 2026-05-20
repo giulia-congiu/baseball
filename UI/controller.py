@@ -11,7 +11,7 @@ class Controller:
 
 
     def handleCreaGrafo(self, e):
-        self._model.creaGrafo()
+        self._model.creaGrafo(self._view._ddAnno.value)
         n, m = self._model.getGraphDetails()
         self._view._txt_result.controls.clear()
         self._view._txt_result.controls.append(
@@ -22,7 +22,20 @@ class Controller:
 
 
     def handleDettagli(self, e):
-        pass
+        if self._choiceTeam is None:
+            self._view._txt_result.controls.clear()
+            self._view._txt_result.controls.append(ft.Text(f"Selezionare un team dal memu", color=red))
+            self._view.update_page
+            return
+
+        viciniTuple= self._model.getVicini(self._choiceTeam)
+        self._view._txt_result.controls.clear()
+        self._view._txt_result.controls.append(ft.Text(f"Il nodo {self._choiceTeam} ha {len(viciniTuple)} vicini"))
+        self._view._txt_result.controls.append(ft.Text(f"Di seguito una lista ordinata di vicini"))
+        for v in viciniTuple:
+            self._view._txt_result.controls.append(
+                ft.Text(f"{v[0]} - peso: {v[1]}", color = "green")
+            )
 
     def handlePercorso(self, e):
         pass
@@ -35,10 +48,10 @@ class Controller:
         #     yearsDD.append(ft.dropdown.Option(year))
 
         yearsDD = list(map(lambda x: ft.dropdown.Option(x), years))
-        self._view.ddAnno.options= yearsDD
+        self._view._ddAnno.options= yearsDD
         self._view.update_page()
 
-    def handleYearSelecton(self):
+    def handleYearSelection(self):
         #questo metodo viene usato quando qualcuno ha selezionato un anno, deve recuperare tutti i
         # team che hanno giocato quell'anno, stamparli nel textfield, e riempire il dd sotto
 

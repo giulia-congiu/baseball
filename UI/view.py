@@ -25,7 +25,7 @@ class View(ft.UserControl):
         # self._page.controls.append(self._title)
 
         self._ddAnno = ft.Dropdown(label="Anno", width=200, alignment=ft.alignment.top_left,
-                                   on_change=self._controller.handleYearSelecton)
+                                   on_change=self._controller.handleYearSelection)
         self.controller.fillDDyears()
 
         row1 = ft.Row([ft.Container(self._title, width=500),
