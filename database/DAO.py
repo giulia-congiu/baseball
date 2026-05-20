@@ -38,7 +38,7 @@ class DAO():
         cursor.execute(query, (year,))
 
         for row in cursor:
-            result.append(Team["year"])
+            result.append(Team(**row))
 
         cursor.close()
         conn.close()

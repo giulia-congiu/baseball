@@ -11,7 +11,15 @@ class Controller:
 
 
     def handleCreaGrafo(self, e):
-        pass
+        self._model.creaGrafo()
+        n, m = self._model.getGraphDetails()
+        self._view._txt_result.controls.clear()
+        self._view._txt_result.controls.append(
+            ft.Text(f"Grafo correttamente creato! "
+                    f"Il grafo è costituito di {n} nodi ed {m} archi"))
+
+        self._view.update_page()
+
 
     def handleDettagli(self, e):
         pass
@@ -31,8 +39,9 @@ class Controller:
         self._view.update_page()
 
     def handleYearSelecton(self):
-        #questo metodo viene usato quando qualcuno ha selezionato un anno, deve recuperare tutti i team che hanno giocato quell'anno,
-            #stamparli nel textfield, e riempire il dd sotto
+        #questo metodo viene usato quando qualcuno ha selezionato un anno, deve recuperare tutti i
+        # team che hanno giocato quell'anno, stamparli nel textfield, e riempire il dd sotto
+
         if self._view.ddAnno.value is None:
             self._view._txtOutSquadre.controls.clear()
             self._view._txtOutSquadre.controls.append("selezionare un anno dal menu")
@@ -40,7 +49,7 @@ class Controller:
         teams = self._model.getTeamsOfYear(self._view.ddAnno.value)
         self._view._txtOutSquadre.controls.clear()
         self._view._txtOutSquadre.controls.append(ft.Text(f"Per il {self._view.ddAnno.value} sono iscritte al campionato"
-                                                          f" {len(teams)} sqaudre "))
+                                                          f" {len(teams)} squadre "))
         for t in teams:
             self._view._txtOutSquadre.controls.append(ft.Text(t))
             self._view._ddSquadra.options.append(
@@ -54,7 +63,7 @@ class Controller:
 
     def readDDTeams(self, e):
         if e.control.data is None:
-            self.choiceTeam = None
+            self._choiceTeam = None
         else:
-            self.choiceTeam = e.control.data
-        print(F"selezionare il {self.choiceTeam}")
+            self._choiceTeam = e.control.data
+        print(f"Selezionato il team {self._choiceTeam}")
