@@ -15,29 +15,59 @@ class Model:
         self._bestPath = []
         self._bestObjVal = 0
 
+    def getAllYears(self):
+        return DAO.getAllYears()
+
+    def getTeamsOfYear(self, year):
+        self._teams =  DAO.getTeamsOfYear(year)
+        self._idMapTeams = {t.ID: t for t in self._grafo.nodes}
+        return self._teams
+
+    def getVicini(self, source):
+        vicini = self._grafo.neighbors(source)
+        viciniTuples =[]
+        for v in vicini:
+            viciniTuples.append(self._grafo[source][v]["weight"])
+        viciniTuples.sort(key=lambda x: x[1], reverse= True) #le ordino per peso dell arco
+        return viciniTuples
+
+    def creaGrafo(self, year):
+        self._grafo.clear()
+        self._grafo.add_nodes_from(self._teams)
+        # for u in self._grafo.nodes: //DOPPIO LOOP, NON CONVIENE
+        #     for v in self._grafo.nodes:
+        #         if u!=v:
+        #             self._grafo.add_edge(u, v)
+        myedges = list(itertools.combinations(self._teams, 2))
+
+        self._grafo.add_edges_from(myedges)
+        mapSalary = DAO.getSalariesTeam(year, self._idMapTeams) #dizionario che ha per ogni team il suo salario
+        for e in self._grafo.edges:
+            sal1 = mapSalary[e[0]] #salario del 1 team dell'arco
+            sal2 = mapSalary[e[1]]
+            peso = sal1+sal2
+            self._grafo[e[0]][e[1]]["weight"] = peso
+            #potevo direttamente dire
+           # self._grafo[e[1]][e[0]]["weight"] = mapSalary[e[0]] + mapSalary[e[1]]
+
     def getPath(self, v0):
         self._bestPath = []
         self._bestObjVal =0
-
         parziale = [v0]
-
         for v in self._grafo.neighbors(v0):
             parziale.append(v)
-            self._ricorsione(parziale)
+            self.ricorsione(parziale)
             parziale.pop()
 
     def getPath2(self, v0):
         self._bestPath = []
         self._bestObjVal = 0
-
         parziale = [v0]
-
         listaVicini = self.getVicini(parziale[-1])
         parziale.append(listaVicini[0][0])
         self.ricorsione2(parziale)
         parziale.pop()
         return self._bestPath and self._bestObjVal
-
 
     #VERSIONE 1, TROPPO LENTA
     def ricorsione(self, parziale):
@@ -77,10 +107,9 @@ class Model:
         for v in listaVicini:
             if v[0] not in parziale and self._grafo[parziale[-2]][parziale[-1]]["weight"] > v[1]:
                 parziale.append(v[0])
-                self._ricorsione2(parziale)
+                self.ricorsione2(parziale)
                 parziale.pop()
                 return
-
 
     def _score(self, parziale):
         '''gli arriva una lista di nodi, sono sicura che questa lista di nodi è connessa da archi,
@@ -90,46 +119,10 @@ class Model:
             score += self._grafo[parziale[i]][parziale[i+1]]["weight"]
         return score
 
-    def creaGrafo(self, year):
-        self._grafo.clear()
-        self._grafo.add_nodes_from(self._teams)
-
-        # for u in self._grafo.nodes:
-        #     for v in self._grafo.nodes:
-        #         if u!=v:
-        #             self._grafo.add_edge(u, v)
-
-        myedges = list(itertools.combinations(self._teams, 2))
-
-        self._grafo.add_edges_from(myedges)
-        mapSalary = DAO.getSalariesTeam(year, self._idMapTeams) #dizionario che ha per ogni team il suo salario
-        for e in self._grafo.edges:
-            sal1 = mapSalary[e[0]] #salario del 1 team dell'arco
-            sal2 = mapSalary[e[1]]
-            peso = sal1+sal2
-            self._grafo[e[0]][e[1]]["weight"] = peso
-            #potevo direttamente dire
-           # self._grafo[e[1]][e[0]]["weight"] = mapSalary[e[0]] + mapSalary[e[1]]
-
-    def getVicini(self, source):
-        vicini = self._grafo.neighbors((source))
-        viciniTuples =[]
-        for v in vicini:
-            viciniTuples.append(self._grafo[source][v]["weight"])
-        viciniTuples.sort(key=lambda x: x[1], reverse= True) #le ordino per peso dell arco
-        return viciniTuples
-
-    def getTeamsOfYear(self, year):
-        self._teams =  DAO.getTeamsOfYear(year)
-        self._idMapTeams = {t.ID: t for t in self._grafo.nodes}
-        return self._teams
 
     def  getRandomNodes(self):
         index = random.randint(0,len(self._teams))
         return self._teams[index]
-
-    def getAllYears(self):
-        return DAO.getAllYears()
 
     def getGraphDetails(self):
         return len(self._grafo.nodes), len(self._grafo.edges)
